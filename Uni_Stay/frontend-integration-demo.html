@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurangabad PG & Hostel Finder - UniStay Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-glow: rgba(79, 70, 229, 0.15);
+            --success: #10b981;
+            --success-glow: rgba(16, 185, 129, 0.1);
+            --warning: #f59e0b;
+            --bg-dark: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --bg-sidebar: rgba(15, 23, 42, 0.85);
+            --border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --glass-blur: blur(16px);
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.4);
+            --font: 'Outfit', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--font);
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) var(--bg-dark);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphic Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .navbar-brand span {
+            background: linear-gradient(135deg, #818cf8, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .navbar-brand svg {
+            stroke: var(--primary-light);
+        }
+
+        .badge-portal {
+            background: var(--primary-glow);
+            color: var(--primary-light);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+        }
+
+        /* Layout Structure */
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            min-height: 100vh;
+            padding-top: 70px;
+        }
+
+        /* Sidebar Filter System */
+        .sidebar {
+            background: var(--bg-sidebar);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-right: 1px solid var(--border);
+            padding: 1.5rem;
+            overflow-y: auto;
+            height: calc(100vh - 70px);
+            position: sticky;
+            top: 70px;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .filter-section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            letter-spacing: 0.5px;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        .btn-reset-filters {
+            background: transparent;
+            color: var(--primary-light);
+            border: none;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-reset-filters:hover {
+            color: #ff4757;
+            transform: scale(1.05);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.65rem 0.85rem;
+            color: var(--text-main);
+            outline: none;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.25);
+        }
+
+        .radio-checkbox-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .custom-control {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            background: rgba(30, 41, 59, 0.4);
+            padding: 0.5rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
+
+        .custom-control:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .custom-control input {
+            cursor: pointer;
+            accent-color: var(--primary-light);
+        }
+
+        .price-display-wrapper {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.4rem;
+        }
+
+        /* Range Slider Styling */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(15, 23, 42, 0.8);
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            cursor: pointer;
+            box-shadow: 0 0 8px var(--primary-light);
+            transition: transform 0.1s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        /* Main Workspace Panel */
+        .main-workspace {
+            padding: 2rem;
+            overflow-y: auto;
+            height: calc(100vh - 70px);
+        }
+
+        .workspace-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .workspace-title h2 {
+            font-size: 1.75rem;
+            font-weight: 800;
+        }
+
+        .workspace-title p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        .sort-select-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Grid Listings */
+        .properties-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Premium Card Design */
+        .property-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .property-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 12px 24px -10px rgba(99, 102, 241, 0.3);
+        }
+
+        .card-image-wrapper {
+            position: relative;
+            height: 200px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .property-card:hover .card-image {
+            transform: scale(1.08);
+        }
+
+        .card-badges {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            z-index: 10;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.3rem 0.7rem;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-type-hostel {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .badge-type-pg {
+            background: #a855f7;
+            color: #fff;
+        }
+
+        .badge-gender-boys {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        .badge-gender-girls {
+            background: #db2777;
+            color: #fff;
+        }
+
+        .badge-gender-coed {
+            background: #059669;
+            color: #fff;
+        }
+
+        .badge-verified {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--success);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            z-index: 10;
+        }
+
+        .card-content {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .card-rating-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--warning);
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .card-distance {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.4rem;
+            line-height: 1.3;
+        }
+
+        .card-location {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .card-amenities {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin-bottom: 1.2rem;
+        }
+
+        .amenity-pill {
+            font-size: 0.7rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: var(--text-muted);
+        }
+
+        .card-footer {
+            border-top: 1px solid var(--border);
+            padding-top: 0.8rem;
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-price {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary-light);
+        }
+
+        .card-price span {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--text-muted);
+        }
+
+        .btn-view-details {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-view-details:hover {
+            background: var(--primary-light);
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+            transform: scale(1.02);
+        }
+
+        /* Pagination Controls */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn-pagination {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-pagination:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .btn-pagination:not(:disabled):hover {
+            border-color: var(--primary-light);
+            background: var(--primary-glow);
+        }
+
+        .pagination-info {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Detailed Modal Overlay styling */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            padding: 1.5rem;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-box {
+            background: var(--bg-sidebar);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: var(--shadow-glow);
+            border-radius: 20px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            padding: 1.75rem;
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: scale(1);
+        }
+
+        .btn-close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-close-modal:hover {
+            background: #ff4757;
+            border-color: #ff4757;
+            transform: rotate(90deg);
+        }
+
+        .modal-image {
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 1.25rem;
+            border: 1px solid var(--border);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            padding: 1rem;
+            border-radius: 12px;
+        }
+
+        .modal-meta-item {
+            font-size: 0.9rem;
+        }
+
+        .modal-meta-item strong {
+            color: var(--text-muted);
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.15rem;
+        }
+
+        .modal-desc {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 1.25rem;
+        }
+
+        .modal-contacts {
+            border-top: 1px solid var(--border);
+            padding-top: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .contact-pill {
+            background: var(--success-glow);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 4rem 2rem;
+            background: rgba(30, 41, 59, 0.3);
+            border: 1px dashed var(--border);
+            border-radius: 16px;
+        }
+
+        .empty-state svg {
+            stroke: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Transparent Glass Navbar -->
+    <nav class="navbar">
+        <a href="#" class="navbar-brand">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            Uni<span>Stay</span>
+        </a>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span class="badge-portal">Aurangabad MongoDB Engine</span>
+        </div>
+    </nav>
+
+    <div class="dashboard-layout">
+        <!-- Sidebar filters -->
+        <aside class="sidebar">
+            <div class="filter-section-title">
+                <span>Advanced Filters</span>
+                <button class="btn-reset-filters" onclick="resetAllFilters()">Reset</button>
+            </div>
+
+            <!-- search College / Location -->
+            <div class="form-group">
+                <label class="form-label">Search</label>
+                <input type="text" id="filterSearch" class="form-control" placeholder="Search by name, location, college...">
+            </div>
+
+            <!-- Property Type -->
+            <div class="form-group">
+                <label class="form-label">Property Type</label>
+                <select id="filterPropertyType" class="form-control">
+                    <option value="all">Any Property Type</option>
+                    <option value="Hostel">Hostel</option>
+                    <option value="PG">PG Accommodation</option>
+                </select>
+            </div>
+
+            <!-- Hostel Type (Gender) -->
+            <div class="form-group">
+                <label class="form-label">Hostel/Gender Type</label>
+                <select id="filterHostelType" class="form-control">
+                    <option value="all">Any Gender Selection</option>
+                    <option value="Boys">Boys Only</option>
+                    <option value="Girls">Girls Only</option>
+                    <option value="Co-ed">Co-ed Living</option>
+                </select>
+            </div>
+
+            <!-- Rent Slider -->
+            <div class="form-group">
+                <label class="form-label">Budget Limit (Monthly)</label>
+                <input type="range" id="filterMaxPrice" min="3000" max="25000" step="500" value="25000">
+                <div class="price-display-wrapper">
+                    <span>₹3,000</span>
+                    <span id="priceValDisplay" style="color: var(--primary-light); font-weight: 700;">Up to ₹25,000</span>
+                </div>
+            </div>
+
+            <!-- AC Options -->
+            <div class="form-group">
+                <label class="form-label">AC Specifications</label>
+                <select id="filterAcType" class="form-control">
+                    <option value="all">Any AC / Non-AC</option>
+                    <option value="AC">AC Rooms</option>
+                    <option value="Non-AC">Non-AC Rooms</option>
+                </select>
+            </div>
+
+            <!-- Bed Sharing Arrangements -->
+            <div class="form-group">
+                <label class="form-label">Bed Type</label>
+                <select id="filterBedType" class="form-control">
+                    <option value="all">Any Sharing Layout</option>
+                    <option value="Single">Single Bed</option>
+                    <option value="Double">Double Sharing</option>
+                    <option value="Triple">Triple Sharing</option>
+                    <option value="4 Sharing">4 Sharing Bed</option>
+                </select>
+            </div>
+
+            <!-- Distance from Campus Limit -->
+            <div class="form-group">
+                <label class="form-label">Distance from Campus</label>
+                <input type="range" id="filterMaxDistance" min="0.5" max="12" step="0.5" value="12">
+                <div class="price-display-wrapper">
+                    <span>0.5 km</span>
+                    <span id="distanceValDisplay" style="color: var(--primary-light); font-weight: 700;">Within 12 km</span>
+                </div>
+            </div>
+
+            <!-- Minimum Rating slider -->
+            <div class="form-group">
+                <label class="form-label">Minimum Rating</label>
+                <input type="range" id="filterMinRating" min="1" max="5" step="0.5" value="1">
+                <div class="price-display-wrapper">
+                    <span>1.0 Star</span>
+                    <span id="ratingValDisplay" style="color: var(--primary-light); font-weight: 700;">All Stars</span>
+                </div>
+            </div>
+
+            <!-- Toggles for food and bathrooms -->
+            <div class="form-group">
+                <label class="form-label">Room Features</label>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <label class="custom-control">
+                        <input type="checkbox" id="filterFoodIncluded">
+                        <span>Free Meals/Food Included</span>
+                    </label>
+                    <label class="custom-control">
+                        <input type="checkbox" id="filterAttachedBathroom">
+                        <span>Attached Bathroom</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Amenities checkboxes -->
+            <div class="form-group">
+                <label class="form-label">Amenities</label>
+                <div class="radio-checkbox-grid">
+                    <label class="custom-control"><input type="checkbox" class="amenity-checkbox" value="WiFi"> WiFi</label>
+                    <label class="custom-control"><input type="checkbox" class="amenity-checkbox" value="Laundry"> Laundry</label>
+                    <label class="custom-control"><input type="checkbox" class="amenity-checkbox" value="Gym"> Gym</label>
+                    <label class="custom-control"><input type="checkbox" class="amenity-checkbox" value="Library"> Library</label>
+                    <label class="custom-control"><input type="checkbox" class="amenity-checkbox" value="Pool"> Pool</label>
+                    <label class="custom-control"><input type="checkbox" class="amenity-checkbox" value="Power Backup"> Power</label>
+                    <label class="custom-control"><input type="checkbox" class="amenity-checkbox" value="CCTV"> CCTV</label>
+                    <label class="custom-control"><input type="checkbox" class="amenity-checkbox" value="Mess"> Mess</label>
+                    <label class="custom-control"><input type="checkbox" class="amenity-checkbox" value="Parking"> Parking</label>
+                    <label class="custom-control"><input type="checkbox" class="amenity-checkbox" value="Study Room"> Study</label>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main listings dashboard -->
+        <main class="main-workspace">
+            <div class="workspace-header">
+                <div class="workspace-title">
+                    <h2>Explore Aurangabad Hostels & PGs</h2>
+                    <p id="totalCountDisplay">Finding listings...</p>
+                </div>
+
+                <div class="sort-select-wrapper">
+                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Sort By:</span>
+                    <select id="filterSortBy" class="form-control" style="width: 180px; padding: 0.5rem;">
+                        <option value="highestRated">Highest Rated</option>
+                        <option value="nearestFirst">Nearest Campus</option>
+                        <option value="priceLowToHigh">Rent: Low to High</option>
+                        <option value="priceHighToLow">Rent: High to Low</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Property Cards Grid -->
+            <div class="properties-grid" id="propertiesContainer">
+                <!-- Dynamically Injected via API fetch -->
+            </div>
+
+            <!-- skip Pagination Controls -->
+            <div class="pagination-container" id="paginationWrapper">
+                <button class="btn-pagination" id="btnPrevPage" onclick="changePage(-1)">Previous</button>
+                <span class="pagination-info" id="paginationInfoDisplay">Page 1 of 1</span>
+                <button class="btn-pagination" id="btnNextPage" onclick="changePage(1)">Next</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Detailed View Modal Overlay -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal-box">
+            <button class="btn-close-modal" onclick="closeModal()">×</button>
+            <img id="modalImage" class="modal-image" src="" alt="Property View">
+            
+            <h3 id="modalTitle" class="modal-title">Property Name</h3>
+            <p id="modalAddress" style="color: var(--primary-light); font-size: 0.9rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 4px;">📍 Location</p>
+            
+            <div class="modal-meta-grid">
+                <div class="modal-meta-item">
+                    <strong>Accommodation Type</strong>
+                    <span id="modalPropType">Hostel (Boys)</span>
+                </div>
+                <div class="modal-meta-item">
+                    <strong>Monthly Rent</strong>
+                    <span id="modalRent" style="font-weight: 700; color: var(--success);">₹0 /mo</span>
+                </div>
+                <div class="modal-meta-item">
+                    <strong>AC Room Availability</strong>
+                    <span id="modalAc">AC</span>
+                </div>
+                <div class="modal-meta-item">
+                    <strong>Sharing Bed Layout</strong>
+                    <span id="modalBed">Double Bed</span>
+                </div>
+                <div class="modal-meta-item">
+                    <strong>Distance from Campus</strong>
+                    <span id="modalDistance">1.2 km</span>
+                </div>
+                <div class="modal-meta-item">
+                    <strong>Available Vacant Beds</strong>
+                    <span id="modalBedsCount">5 Beds</span>
+                </div>
+            </div>
+
+            <h4 style="font-size: 0.9rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;">Description</h4>
+            <p id="modalDesc" class="modal-desc">Description text here...</p>
+
+            <h4 style="font-size: 0.9rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;">Included Facilities</h4>
+            <div class="card-amenities" id="modalAmenities" style="margin-bottom: 1.5rem;">
+                <!-- Amenities pills -->
+            </div>
+
+            <div class="modal-contacts">
+                <div>
+                    <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">Listing Owner</span>
+                    <strong id="modalOwner">Mr. Owner</strong>
+                </div>
+                <span class="contact-pill" id="modalContact">Call: +91</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Integration Client API Handler -->
+    <script>
+        const API_BASE_URL = 'http://localhost:5001/api/properties';
+        let currentPage = 1;
+        let totalPages = 1;
+
+        // Document elements cache
+        const container = document.getElementById('propertiesContainer');
+        const countDisplay = document.getElementById('totalCountDisplay');
+        const paginationInfo = document.getElementById('paginationInfoDisplay');
+        const btnPrev = document.getElementById('btnPrevPage');
+        const btnNext = document.getElementById('btnNextPage');
+
+        // Dynamic Display tag updates
+        document.getElementById('filterMaxPrice').addEventListener('input', function() {
+            document.getElementById('priceValDisplay').innerText = this.value == 25000 
+                ? 'Up to ₹25,000' 
+                : `Up to ₹${parseInt(this.value).toLocaleString('en-IN')}`;
+            fetchFilteredData(1);
+        });
+
+        document.getElementById('filterMaxDistance').addEventListener('input', function() {
+            document.getElementById('distanceValDisplay').innerText = this.value == 12 
+                ? 'Within 12 km' 
+                : `Within ${this.value} km`;
+            fetchFilteredData(1);
+        });
+
+        document.getElementById('filterMinRating').addEventListener('input', function() {
+            document.getElementById('ratingValDisplay').innerText = this.value == 1 
+                ? 'All Stars' 
+                : `${this.value}+ Stars`;
+            fetchFilteredData(1);
+        });
+
+        // Register event listener elements trigger fetch
+        const filterControls = [
+            'filterSearch', 'filterPropertyType', 'filterHostelType', 
+            'filterAcType', 'filterBedType', 'filterFoodIncluded', 
+            'filterAttachedBathroom', 'filterSortBy'
+        ];
+
+        filterControls.forEach(controlId => {
+            const el = document.getElementById(controlId);
+            if (el) {
+                const eventType = el.type === 'text' ? 'input' : 'change';
+                el.addEventListener(eventType, () => fetchFilteredData(1));
+            }
+        });
+
+        // Register multi-checkbox amenities triggers
+        document.querySelectorAll('.amenity-checkbox').forEach(cb => {
+            cb.addEventListener('change', () => fetchFilteredData(1));
+        });
+
+        // Reset Filter parameters
+        function resetAllFilters() {
+            document.getElementById('filterSearch').value = '';
+            document.getElementById('filterPropertyType').value = 'all';
+            document.getElementById('filterHostelType').value = 'all';
+            
+            document.getElementById('filterMaxPrice').value = 25000;
+            document.getElementById('priceValDisplay').innerText = 'Up to ₹25,000';
+            
+            document.getElementById('filterAcType').value = 'all';
+            document.getElementById('filterBedType').value = 'all';
+            
+            document.getElementById('filterMaxDistance').value = 12;
+            document.getElementById('distanceValDisplay').innerText = 'Within 12 km';
+            
+            document.getElementById('filterMinRating').value = 1;
+            document.getElementById('ratingValDisplay').innerText = 'All Stars';
+            
+            document.getElementById('filterFoodIncluded').checked = false;
+            document.getElementById('filterAttachedBathroom').checked = false;
+            
+            document.querySelectorAll('.amenity-checkbox').forEach(cb => cb.checked = false);
+            document.getElementById('filterSortBy').value = 'highestRated';
+
+            fetchFilteredData(1);
+        }
+
+        // Fetch properties matching our parameters matrix from MongoDB
+        async function fetchFilteredData(page = 1) {
+            currentPage = page;
+            container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem;"><p style="color: var(--text-muted);">Fetching dynamic results from MongoDB...</p></div>`;
+
+            // Build query params
+            const params = new URLSearchParams();
+            params.append('page', currentPage);
+            params.append('limit', 6);
+
+            const searchVal = document.getElementById('filterSearch').value.trim();
+            if (searchVal) params.append('search', searchVal);
+
+            const propTypeVal = document.getElementById('filterPropertyType').value;
+            if (propTypeVal !== 'all') params.append('propertyType', propTypeVal);
+
+            const hostelTypeVal = document.getElementById('filterHostelType').value;
+            if (hostelTypeVal !== 'all') params.append('hostelType', hostelTypeVal);
+
+            const maxPriceVal = document.getElementById('filterMaxPrice').value;
+            params.append('maxPrice', maxPriceVal);
+
+            const acTypeVal = document.getElementById('filterAcType').value;
+            if (acTypeVal !== 'all') params.append('acType', acTypeVal);
+
+            const bedTypeVal = document.getElementById('filterBedType').value;
+            if (bedTypeVal !== 'all') params.append('bedType', bedTypeVal);
+
+            const maxDistVal = document.getElementById('filterMaxDistance').value;
+            if (maxDistVal !== '12') params.append('maxDistance', maxDistVal);
+
+            const minRatingVal = document.getElementById('filterMinRating').value;
+            if (minRatingVal !== '1') params.append('minRating', minRatingVal);
+
+            if (document.getElementById('filterFoodIncluded').checked) params.append('foodIncluded', 'true');
+            if (document.getElementById('filterAttachedBathroom').checked) params.append('attachedBathroom', 'true');
+
+            // Collect amenities list arrays
+            document.querySelectorAll('.amenity-checkbox:checked').forEach(cb => {
+                params.append('amenities', cb.value);
+            });
+
+            const sortByVal = document.getElementById('filterSortBy').value;
+            params.append('sortBy', sortByVal);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/filter?${params.toString()}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    renderPropertyGrid(result.data);
+                    updatePagination(result.pagination);
+                } else {
+                    container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: red;"><p>Failed to query MongoDB server assets.</p></div>`;
+                }
+            } catch (error) {
+                console.error("API communications breakdown:", error);
+                container.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 3rem;" class="empty-state">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        <h3>MongoDB Engine Offline</h3>
+                        <p>Could not connect to http://localhost:5001. Make sure to run <b>node server-mongo.js</b> inside your folder!</p>
+                    </div>
+                `;
+                countDisplay.innerText = "Connection Failed";
+            }
+        }
+
+        // Render card grids
+        function renderPropertyGrid(properties) {
+            container.innerHTML = '';
+
+            if (properties.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <h3>No Properties Found</h3>
+                        <p>No hostels or PGs in Aurangabad match your specific advanced filters matrix. Try resetting controls.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            properties.forEach(prop => {
+                const image = prop.images && prop.images[0] ? prop.images[0] : 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800';
+                const typeClass = prop.propertyType === 'Hostel' ? 'badge-type-hostel' : 'badge-type-pg';
+                const genderClass = prop.hostelType === 'Boys' ? 'badge-gender-boys' : prop.hostelType === 'Girls' ? 'badge-gender-girls' : 'badge-gender-coed';
+                
+                const amenitiesHtml = prop.amenities.slice(0, 4).map(a => `<span class="amenity-pill">${a}</span>`).join('');
+
+                const cardHtml = `
+                    <div class="property-card">
+                        <div class="card-image-wrapper">
+                            <img class="card-image" src="${image}" alt="${prop.propertyName}" onerror="this.src='https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800'">
+                            <div class="card-badges">
+                                <span class="badge ${typeClass}">${prop.propertyType}</span>
+                                <span class="badge ${genderClass}">${prop.hostelType}</span>
+                            </div>
+                            ${prop.verified ? '<span class="badge-verified"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>Verified</span>' : ''}
+                        </div>
+                        <div class="card-content">
+                            <div class="card-rating-row">
+                                <div class="card-rating">★ ${prop.rating.toFixed(1)}</div>
+                                <div class="card-distance">📍 ${prop.distanceFromCampus} km from Campus</div>
+                            </div>
+                            <h3 class="card-title">${prop.propertyName}</h3>
+                            <div class="card-location">
+                                🏠 ${prop.location} | Near ${prop.nearbyCollege.split(' ')[0]}
+                            </div>
+                            <div class="card-amenities">
+                                ${amenitiesHtml}
+                                ${prop.amenities.length > 4 ? `<span class="amenity-pill">+${prop.amenities.length - 4} More</span>` : ''}
+                            </div>
+                            <div class="card-footer">
+                                <div class="card-price">₹${prop.monthlyRent.toLocaleString('en-IN')}<span>/month</span></div>
+                                <button class="btn-view-details" onclick="openDetailsModal(${prop.id})">Details</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += cardHtml;
+            });
+        }
+
+        // Pagination controls updates
+        function updatePagination(meta) {
+            totalPages = meta.totalPages || 1;
+            currentPage = meta.currentPage || 1;
+
+            countDisplay.innerText = `${meta.totalResults} Premium Properties Found in Aurangabad`;
+            paginationInfo.innerText = `Page ${currentPage} of ${totalPages}`;
+
+            btnPrev.disabled = currentPage === 1;
+            btnNext.disabled = currentPage === totalPages || totalPages === 0;
+
+            if (totalPages <= 1) {
+                document.getElementById('paginationWrapper').style.display = 'none';
+            } else {
+                document.getElementById('paginationWrapper').style.display = 'flex';
+            }
+        }
+
+        function changePage(direction) {
+            const targetPage = currentPage + direction;
+            if (targetPage >= 1 && targetPage <= totalPages) {
+                fetchFilteredData(targetPage);
+            }
+        }
+
+        // Details Modal popups
+        async function openDetailsModal(id) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/${id}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    const prop = result.data;
+                    
+                    document.getElementById('modalImage').src = prop.images[0] || 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800';
+                    document.getElementById('modalTitle').innerText = prop.propertyName;
+                    document.getElementById('modalAddress').innerText = `📍 ${prop.location} area, near ${prop.nearbyCollege}`;
+                    document.getElementById('modalPropType').innerText = `${prop.propertyType} (${prop.hostelType})`;
+                    document.getElementById('modalRent').innerText = `₹${prop.monthlyRent.toLocaleString('en-IN')} /mo`;
+                    document.getElementById('modalAc').innerText = prop.acType;
+                    document.getElementById('modalBed').innerText = `${prop.bedType} Arrangement`;
+                    document.getElementById('modalDistance').innerText = `${prop.distanceFromCampus} km from Campus`;
+                    document.getElementById('modalBedsCount').innerText = `${prop.availableBeds} beds available`;
+                    document.getElementById('modalDesc').innerText = prop.description;
+                    document.getElementById('modalOwner').innerText = prop.ownerName;
+                    document.getElementById('modalContact').innerText = `Call: ${prop.contactNumber}`;
+
+                    // Amenities list mapping
+                    const amenitiesBox = document.getElementById('modalAmenities');
+                    amenitiesBox.innerHTML = prop.amenities.map(a => `<span class="badge" style="background:rgba(99, 102, 241, 0.15); color:var(--primary-light); border:1px solid rgba(99, 102, 241, 0.3); text-transform:none;">${a}</span>`).join('');
+
+                    document.getElementById('detailModal').classList.add('active');
+                }
+            } catch (err) {
+                console.error("Modal fetch error:", err);
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('active');
+        }
+
+        // Close modal on escape or background clicks
+        document.getElementById('detailModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // Initialize page filters
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchFilteredData(1);
+        });
+    </script>
+</body>
+</html>

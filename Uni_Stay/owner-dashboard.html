@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Portal - UniStay</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        /* Modern Glassmorphic Modal Overlay Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.65); /* Rich dark backdrop */
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content-container {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 750px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2.5rem;
+            box-shadow: var(--shadow-lg), var(--shadow-glow);
+            transform: scale(0.92);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .modal-overlay.active .modal-content-container {
+            transform: scale(1);
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+        }
+
+        .modal-close-btn:hover {
+            background: var(--background);
+            color: var(--text-main);
+        }
+
+        .modal-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .count-badge {
+            font-size: 0.9rem;
+            background: var(--primary-light);
+            color: var(--primary-hover);
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-weight: bold;
+            margin-left: 10px;
+            box-shadow: var(--shadow-sm);
+        }
+    </style>
+</head>
+<body class="theme-owner">
+
+    <!-- Navigation -->
+    <nav class="navbar glass">
+        <div class="container" style="max-width: 100%; padding: 0 2rem;">
+            <a href="owner-dashboard.html" class="navbar-brand">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                Uni<span>Stay</span> <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted);">(Owner Portal)</span>
+            </a>
+            <div class="nav-links">
+                <span id="userNameDisplay" style="font-weight: 600; color: var(--primary);">Owner</span>
+                <button class="btn btn-outline" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="padding-top: 100px; padding-bottom: 4rem; max-width: 1000px;">
+        
+        <div class="owner-tabs animate-fade-in">
+            <button class="owner-tab active" onclick="switchOwnerTab('listings')">My Listings</button>
+            <button class="owner-tab" onclick="switchOwnerTab('messages')">Messages</button>
+        </div>
+
+        <!-- TAB: MY LISTINGS -->
+        <div id="tab-listings" class="tab-content active">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                <h2 style="display: flex; align-items: center;">
+                    Manage Inventory 
+                    <span class="count-badge" id="inventoryCountBadge">0 Listings</span>
+                </h2>
+                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                    <button class="btn btn-outline" onclick="seedDatabase()" style="border-color: #3b82f6; color: #3b82f6; background: rgba(59, 130, 246, 0.08);">⚡ Seed 20 Pune Hostels</button>
+                    <!-- Hooked Up Refresh Button Component -->
+                    <button class="btn btn-outline" id="refreshInventoryBtn" onclick="loadOwnerInventory()">Refresh</button>
+                    <!-- Hooked Up Add Hostel Button Component -->
+                    <button class="btn btn-primary" onclick="openListingForm()">+ Add New Hostel</button>
+                </div>
+            </div>
+            <div class="inventory-grid" id="ownerListings">
+                <!-- Dynamically synchronized from Supabase Cloud -->
+            </div>
+        </div>
+
+        <!-- TAB: MESSAGES -->
+        <div id="tab-messages" class="tab-content">
+            <h2 class="mb-4">Student Inquiries</h2>
+            <div class="messages-container">
+                <div class="msg-list" id="msgList">
+                    <!-- Injected via app.js -->
+                </div>
+                <div class="msg-detail" id="msgDetail">
+                    <div style="flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
+                        Select a message to view
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- GLASSMORPHIC FORM OVERLAY CONTAINER (ID: hostelFormModal) -->
+    <div class="modal-overlay" id="hostelFormModal">
+        <div class="modal-content-container animate-slide-up">
+            <!-- Modal Close Trigger -->
+            <button class="modal-close-btn" onclick="closeListingForm()">&times;</button>
+            
+            <h2 class="modal-title">UniStay Listing Registry</h2>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">Configure your accommodation credentials. Verified listings immediately go live on the student portal maps.</p>
+
+            <form class="owner-form" id="addHostelForm" style="box-shadow: none; padding: 0; background: transparent;">
+                
+                <h3 class="mb-4" style="color: var(--primary); font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">1. Basic Information</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Hostel Name</label>
+                        <input type="text" id="hName" class="form-control" placeholder="e.g. Kothrud Elite Scholars Co-living" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Hostel Type</label>
+                        <select id="hType" class="form-control form-select">
+                            <option value="Boys">Boys</option>
+                            <option value="Girls">Girls</option>
+                            <option value="Co-ed">Co-ed</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label class="form-label">Exact Location / Address Area</label>
+                        <input type="text" id="hAddress" class="form-control" placeholder="e.g. Paud Road, Near MIT College, Kothrud, Pune" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Monthly Rent Price (INR / ₹)</label>
+                        <input type="number" id="hPrice" class="form-control" placeholder="e.g. 12500" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Distance from Campus (km)</label>
+                        <input type="number" id="hDistance" class="form-control" step="0.1" placeholder="e.g. 0.8" required>
+                    </div>
+                </div>
+
+                <h3 class="mb-4 mt-4" style="color: var(--primary); font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; margin-top: 2rem;">2. Room Specifications</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">AC/Non-AC Selection</label>
+                        <select id="hAc" class="form-control form-select">
+                            <option value="ac">AC Rooms Available</option>
+                            <option value="non-ac">Strictly Non-AC</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Bed Configurations</label>
+                        <select id="hBeds" class="form-control form-select">
+                            <option value="Single">Single Bed</option>
+                            <option value="Double">Double Bed Arrangements</option>
+                            <option value="Mixed">Mixed Bed Configurations</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Security Deposit (₹)</label>
+                        <input type="number" id="hDeposit" class="form-control" placeholder="e.g. 5000" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Curfew Timings / Rules</label>
+                        <input type="text" id="hTimings" class="form-control" placeholder="e.g. 10:30 PM" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Security Details</label>
+                        <input type="text" id="hSecurity" class="form-control" placeholder="e.g. Biometric Access & 24/7 Security" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Staff Gender</label>
+                        <select id="hStaff" class="form-control form-select">
+                            <option value="Male">Male Staff Only</option>
+                            <option value="Female">Female Staff Only</option>
+                            <option value="Mixed">Mixed Staffing</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Mess Foods Quality</label>
+                    <input type="text" id="hMess" class="form-control" placeholder="e.g. Excellent Veg/Non-veg Buffets" required>
+                </div>
+
+                <h3 class="mb-4 mt-4" style="color: var(--primary); font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; margin-top: 2rem;">3. Amenities Checkboxes</h3>
+                <div class="form-group">
+                    <div style="display: flex; gap: 1.25rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                        <label style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 500;"><input type="checkbox" name="hFeature" value="WiFi" checked> High-Speed WiFi</label>
+                        <label style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 500;"><input type="checkbox" name="hFeature" value="Laundry" checked> Laundry Service</label>
+                        <label style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 500;"><input type="checkbox" name="hFeature" value="Gym"> Gym Access</label>
+                        <label style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 500;"><input type="checkbox" name="hFeature" value="Power Backup" checked> Power Backup</label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block mt-8" style="font-size: 1.1rem; padding: 1rem; box-shadow: var(--shadow-glow); margin-top: 2rem; border-radius: 12px;">Publish Detailed Listing</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Integrations Framework Scripts -->
+    <script src="config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="properties.seed.js"></script>
+    <script src="app.js"></script>
+
+    <!-- Asynchronous Dynamic UI Synchronization Script -->
+    <script>
+        // ===================================================
+        // DYNAMIC UI LIST INVENTORY SYNCHRONIZATION ENGINE
+        // ===================================================
+        async function loadOwnerInventory() {
+            const container = document.getElementById('ownerListings');
+            const badge = document.getElementById('inventoryCountBadge');
+            
+            if (!container) return;
+
+            // Clear current items and show loading
+            container.innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; padding: 3rem;">
+                    <div style="width: 40px; height: 40px; border: 4px solid var(--primary-light); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
+                    <p style="color: var(--text-muted); font-weight: 500;">Refreshing inventory from Supabase Cloud Cluster...</p>
+                </div>
+            `;
+
+            try {
+                // Ensure Supabase client is initialized
+                if (typeof bootstrapSupabase === 'function') {
+                    await bootstrapSupabase();
+                }
+
+                let listings = [];
+
+                if (window.supabase) {
+                    console.log("[UniStay Inventory] Synchronizing from remote Cloud table...");
+                    const { data, error } = await window.supabase
+                        .from('hostels')
+                        .select('*')
+                        .order('id', { ascending: false });
+                    
+                    if (error) throw error;
+                    listings = data || [];
+                } else {
+                    console.warn("[UniStay Inventory] Supabase offline. Loading local mock registries...");
+                    listings = window.PuneHostelDataset || [];
+                }
+
+                // Clear DOM grid wrapper completely
+                container.innerHTML = "";
+
+                // Update dynamic badge count accurately
+                if (badge) {
+                    badge.textContent = `${listings.length} Listings`;
+                }
+
+                if (listings.length === 0) {
+                    container.innerHTML = `
+                        <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-muted);">
+                            <p style="font-size: 2.5rem; margin-bottom: 0.5rem;">🏢</p>
+                            <p>No active properties registered under your account.</p>
+                            <p style="font-size: 0.85rem; margin-top: 0.25rem;">Click "+ Add New Hostel" to publish your first verified housing card.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Render dynamic inventory card listings
+                container.innerHTML = listings.map(h => {
+                    const priceVal = h.monthly_rent || h.price || 0;
+                    const addressVal = h.full_address || h.location || "Pune, Maharashtra, India";
+                    const genderVal = h.hostel_type || h.type || "Co-ed";
+                    const titleVal = h.hostel_name || h.name || h.title || "Premium Hostel Accommodation";
+                    
+                    return `
+                        <div class="inventory-card glass animate-slide-up" style="border-radius: var(--border-radius); padding: 1.5rem; background: var(--surface); box-shadow: var(--shadow-md); border-top: 4px solid var(--primary); transition: var(--transition);">
+                            <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${titleVal}</h3>
+                            <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">📍 ${addressVal}</p>
+                            <p style="font-size: 0.95rem; font-weight: 700; color: var(--primary); margin-bottom: 1.25rem;">Rent: ₹${priceVal.toLocaleString('en-IN')}/mo <span style="font-weight: normal; color: var(--text-muted); font-size: 0.8rem;">(${genderVal})</span></p>
+                            
+                            <div style="display: flex; gap: 0.75rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+                                <button class="btn btn-outline" onclick="editHostel(${h.id})" style="padding: 0.45rem 1rem; font-size: 0.85rem; flex: 1; border-radius: 8px;">Edit Listing</button>
+                                <button class="btn" onclick="deleteHostel(${h.id})" style="padding: 0.45rem 1rem; font-size: 0.85rem; flex: 1; border-radius: 8px; border: 1px solid var(--danger); color: var(--danger); background: transparent;">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (error) {
+                console.error("[UniStay Sync] Rendering routine failure:", error);
+                container.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: var(--danger);">
+                        <p>⚠️ Failed to sync inventory with Supabase Cloud.</p>
+                        <p style="font-size: 0.85rem; margin-top: 0.25rem;">${error.message || error}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // ===================================================
+        // INTERACTIVE MODAL ACTIONS
+        // ===================================================
+        function openListingForm() {
+            const modal = document.getElementById('hostelFormModal');
+            if (modal) {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeListingForm() {
+            const modal = document.getElementById('hostelFormModal');
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+            
+            // Reset form details
+            window.editingHostelId = null;
+            const form = document.getElementById('addHostelForm');
+            if (form) form.reset();
+            
+            const submitBtn = document.querySelector('#addHostelForm button[type="submit"]');
+            if (submitBtn) submitBtn.textContent = 'Publish Detailed Listing';
+        }
+
+        // Bind helpers to global window scope for inline onclick templates
+        window.openListingForm = openListingForm;
+        window.closeListingForm = closeListingForm;
+        window.loadOwnerInventory = loadOwnerInventory;
+
+        // ===================================================
+        // FORM SUBMIT EVENT INTERCEPTOR
+        // ===================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load inventory dynamically on Dom Ready
+            loadOwnerInventory();
+
+            const form = document.getElementById('addHostelForm');
+            if (form) {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    console.log("[UniStay Owner] Packaging modal form input elements...");
+
+                    // Grab required form values as specified
+                    const hostelName = document.getElementById('hName').value;
+                    const hostelType = document.getElementById('hType').value;
+                    const monthlyRent = parseFloat(document.getElementById('hPrice').value) || 0;
+                    const addressLocation = document.getElementById('hAddress').value;
+                    const campusDistance = parseFloat(document.getElementById('hDistance').value) || 1.0;
+                    const acSelection = document.getElementById('hAc').value;
+                    const bedConfiguration = document.getElementById('hBeds').value;
+                    
+                    // Grab extra values to fully satisfy table schema design
+                    const depositVal = parseFloat(document.getElementById('hDeposit').value) || 5000;
+                    const curfTimings = document.getElementById('hTimings').value || "10:30 PM";
+                    const securityDet = document.getElementById('hSecurity').value || "24/7 Guards & CCTV";
+                    const staffGend = document.getElementById('hStaff').value || "Mixed";
+                    const messQual = document.getElementById('hMess').value || "Excellent";
+                    
+                    // Compile features checkboxes
+                    const checkedFeatures = Array.from(document.querySelectorAll('input[name="hFeature"]:checked')).map(cb => cb.value.toLowerCase());
+
+                    // Mapped to match Pune micro-markets geolocations if coordinates match
+                    let lat = 18.5204;
+                    let lng = 73.8567;
+                    
+                    const lowerAddress = addressLocation.toLowerCase();
+                    if (lowerAddress.includes("kothrud")) { lat = 18.5074; lng = 73.8077; }
+                    else if (lowerAddress.includes("katraj")) { lat = 18.4529; lng = 73.8543; }
+                    else if (lowerAddress.includes("viman")) { lat = 18.5679; lng = 73.9143; }
+                    else if (lowerAddress.includes("hinjewadi")) { lat = 18.5971; lng = 73.7188; }
+                    else if (lowerAddress.includes("shivajinagar")) { lat = 18.5308; lng = 73.8474; }
+                    else if (lowerAddress.includes("dhankawadi")) { lat = 18.4682; lng = 73.8509; }
+                    else if (lowerAddress.includes("karve")) { lat = 18.4897; lng = 73.8186; }
+
+                    const payload = {
+                        name: hostelName,
+                        title: hostelName,
+                        hostel_name: hostelName,
+                        
+                        type: hostelType,
+                        hostel_type: hostelType,
+                        
+                        price: monthlyRent,
+                        monthly_rent: monthlyRent,
+                        
+                        location: addressLocation,
+                        full_address: addressLocation,
+                        address: addressLocation,
+                        
+                        distance: `${campusDistance} km from Campus`,
+                        distance_val: campusDistance,
+                        
+                        ac_type: acSelection,
+                        ac_available: acSelection === 'ac',
+                        
+                        bed_type: bedConfiguration,
+                        
+                        rating: 4.5, // Standard initial user rating
+                        
+                        amenities: checkedFeatures.map(f => f.charAt(0).toUpperCase() + f.slice(1)),
+                        wifi: checkedFeatures.includes('wifi'),
+                        laundry: checkedFeatures.includes('laundry'),
+                        gym: checkedFeatures.includes('gym'),
+                        power_backup: checkedFeatures.includes('power backup') || checkedFeatures.includes('power_backup'),
+                        study_room: checkedFeatures.includes('library') || checkedFeatures.includes('study room'),
+                        
+                        lat: lat,
+                        lng: lng,
+                        
+                        security_deposit: depositVal,
+                        curfew_timings: curfTimings,
+                        security_info: securityDet,
+                        staff_gender: staffGend,
+                        mess_quality: messQual,
+                        image_url: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800"
+                    };
+
+                    try {
+                        const currentEditingId = window.editingHostelId;
+                        let dbError = null;
+
+                        if (window.supabase) {
+                            if (currentEditingId) {
+                                console.log(`[UniStay Submit] Updating listing ID: ${currentEditingId}...`);
+                                const { error } = await window.supabase
+                                    .from('hostels')
+                                    .update(payload)
+                                    .eq('id', currentEditingId);
+                                dbError = error;
+                            } else {
+                                console.log("[UniStay Submit] Inserting new listing into Supabase...");
+                                const { error } = await window.supabase
+                                    .from('hostels')
+                                    .insert([payload]);
+                                dbError = error;
+                            }
+
+                            if (dbError) throw dbError;
+                            alert(currentEditingId ? "Listing updated successfully in Supabase!" : "New hostel successfully published to Supabase Cloud!");
+                        } else {
+                            // Fallback simulation in offline settings
+                            console.warn("[UniStay Submit] Supabase Client Offline. Simulating local insert...");
+                            if (currentEditingId) {
+                                const idx = window.PuneHostelDataset.findIndex(x => x.id == currentEditingId);
+                                if (idx > -1) window.PuneHostelDataset[idx] = { ...window.PuneHostelDataset[idx], ...payload };
+                            } else {
+                                payload.id = Date.now();
+                                window.PuneHostelDataset.push(payload);
+                            }
+                            alert("Simulated submission successful (offline mode)!");
+                        }
+
+                        // Close form modal overlay
+                        closeListingForm();
+                        
+                        // Synchronize inventories views dynamically
+                        loadOwnerInventory();
+
+                    } catch (error) {
+                        console.error("[UniStay Submit] Database operation failed:", error);
+                        alert("Write Operation Failed: " + (error.message || error));
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
